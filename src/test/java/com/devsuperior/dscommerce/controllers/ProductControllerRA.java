@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 
 public class ProductControllerRA {
 
-    private Long existingProductId, nonExistingProductId;
+    private Long existingProductId, nonExistingProductId, dependentProductId;
     private String productName, clientUsername, clientPassword, adminUsername, adminPassword, clientToken, adminToken, invalidToken;
 
     private Map<String, Object> postProductInstance;
@@ -208,6 +208,61 @@ public class ProductControllerRA {
                 .accept(ContentType.JSON)
                 .when()
                 .post("/products")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void deleteShouldReturnNoContentWhenAdminLogged() {
+        existingProductId = 25L;
+
+        given().header("Authorization", "Bearer " + adminToken)
+                .when()
+                .delete("/products/{id}", existingProductId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test
+    public void deleteShouldReturnNotFoundWhenIdDoesNotExistAndAdminLogged() {
+        nonExistingProductId = 100L;
+
+        given().header("Authorization", "Bearer " + adminToken)
+                .when()
+                .delete("/products/{id}", nonExistingProductId)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    public void deleteShouldReturnBadRequestWhenDependentIdAndAdminLogged() {
+        dependentProductId = 3L;
+
+        given().header("Authorization", "Bearer " + adminToken)
+                .when()
+                .delete("/products/{id}", dependentProductId)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    public void deleteShouldReturnForbiddenWhenClientLogged() {
+        existingProductId = 1L;
+
+        given().header("Authorization", "Bearer " + clientToken)
+                .when()
+                .delete("/products/{id}", existingProductId)
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    public void deleteShouldReturnUnauthorizedWhenInvalidToken() {
+        existingProductId = 2L;
+
+        given().header("Authorization", "Bearer " + invalidToken)
+                .when()
+                .delete("/products/{id}", existingProductId)
                 .then()
                 .statusCode(401);
     }
