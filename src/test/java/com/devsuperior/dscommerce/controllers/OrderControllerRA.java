@@ -45,6 +45,28 @@ public class OrderControllerRA {
     }
 
     @Test
+    public void findByIdShouldReturnNotFoundWhenIdDoesNotExistAndAdminLogged() {
+        nonExistingOrderId = 10L;
+
+        given().header("Authorization", "Bearer " + adminToken)
+                .when()
+                .get("/orders/{id}", nonExistingOrderId)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    public void findByIdShouldReturnNotFoundWhenIdDoesNotExistAndClientLogged() {
+        nonExistingOrderId = 10L;
+
+        given().header("Authorization", "Bearer " + adminToken)
+                .when()
+                .get("/orders/{id}", nonExistingOrderId)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
     public void findByIdShouldReturnProductWhenIdExistsAndClientLoggedAndOwnTheOrder() {
         existingOrderId = 1L;
 
